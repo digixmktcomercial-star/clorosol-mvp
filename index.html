@@ -3,168 +3,177 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clorosol | Soluções Químicas B2B | MVP Funcional</title>
+    <title>Clorosol | Potência Química Industrial | Portugal</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://unpkg.com/@google/generative-ai/dist/index.min.js"></script>
     <style>
         html { scroll-behavior: smooth; }
-        .chat-window { transition: all 0.3s ease-in-out; transform: translateY(20px); opacity: 0; pointer-events: none; }
+        .chat-window { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); transform: translateY(20px); opacity: 0; pointer-events: none; }
         .chat-window.open { transform: translateY(0); opacity: 1; pointer-events: auto; }
+        .msg-user { border-radius: 1rem 1rem 0 1rem; }
+        .msg-ai { border-radius: 1rem 1rem 1rem 0; }
+        /* Efeito de digitação suave */
+        .typing-dots { display: inline-flex; align-items: center; gap: 3px; }
+        .typing-dots div { w: 4px; h: 4px; bg-gray-400; rounded-full; animation: bounce 1s infinite; }
+        .typing-dots div:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dots div:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
     </style>
 </head>
 <body class="bg-gray-50 font-sans text-gray-800">
 
     <script>
-        // === ATENÇÃO: COLOQUE SUAS CHAVES AQUI ===
-        const SUPABASE_URL = 'https://hagyqzswtxsbyebkgezi.supabase.co'; // Ex: https://xyz.supabase.co
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhhZ3lxenN3dHhzYnllYmtnZXppIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4Mjg4NzksImV4cCI6MjA4OTQwNDg3OX0.VlGrDy3zIJlvucVUs9RpPKQkVtDTAhy1KZNN-Rxsa-4';       // Aquela chave bem longa
-        // =========================================
-        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        // === ATENÇÃO: COLOQUE SUAS CHAVES REAIS AQUI ===
+        const SUPABASE_URL = 'https://hagyqzswtxsbyebkgezi.supabase.co'; // Já está certo
+        const SUPABASE_KEY = 'SUA_KEY_ANON_DO_SUPABASE_AQUI'; 
+        const GEMINI_API_KEY = 'SUA_API_KEY_DO_GOOGLE_AI_STUDIO_AQUI'; // AIza...
+        // ==============================================
+
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        // Configuração do Gemini 1.5 Flash
+        const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
     </script>
 
-    <nav class="bg-white shadow-sm p-4 sticky top-0 z-50 border-b border-gray-100">
+    <nav class="bg-white/90 backdrop-blur-sm shadow-sm p-4 sticky top-0 z-50 border-b border-gray-100">
         <div class="max-w-7xl mx-auto flex justify-between items-center">
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold text-xl shadow-inner">C</div>
-                <h1 class="text-2xl font-extrabold text-blue-950 tracking-tighter">CLOROSOL</h1>
+                <div class="w-11 h-11 bg-blue-600 rounded-xl flex items-center justify-center text-white font-extrabold text-2xl shadow-inner rotate-3 hover:rotate-0 transition">C</div>
+                <h1 class="text-3xl font-extrabold text-blue-950 tracking-tighter hover:scale-105 transition cursor-pointer">CLOROSOL</h1>
             </div>
-            <div class="hidden md:flex gap-8 text-gray-600 font-medium">
-                <a href="#produtos" class="hover:text-blue-600 transition">Produtos</a>
-                <a href="#exportacao" class="hover:text-blue-600 transition">Exportação</a>
-                <a href="#historia" class="hover:text-blue-600 transition">História</a>
+            <div class="hidden md:flex gap-10 text-gray-700 font-semibold text-sm tracking-tight">
+                <a href="#produtos" class="hover:text-blue-600 transition relative group">Produtos<span class="absolute bottom-0 left-0 w-0 h-0.5 bg-blue-600 group-hover:w-full transition-all"></span></a>
+                <a href="#exportacao" class="hover:text-blue-600 transition relative group">Exportação<span class="absolute bottom-0 left-0 w-0 h-0.5 bg-blue-600 group-hover:w-full transition-all"></span></a>
+                <a href="#historia" class="hover:text-blue-600 transition relative group">História<span class="absolute bottom-0 left-0 w-0 h-0.5 bg-blue-600 group-hover:w-full transition-all"></span></a>
             </div>
-            <a href="#orcamento" class="bg-blue-600 text-white px-6 py-2.5 rounded-full font-semibold hover:bg-blue-700 transition shadow-sm text-sm">Pedido B2B</a>
+            <a href="#orcamento" class="bg-blue-600 text-white px-7 py-3 rounded-full font-bold hover:bg-blue-700 transition shadow-lg text-sm transform hover:-translate-y-0.5">Pedido B2B</a>
         </div>
     </nav>
 
-    <header class="py-24 px-6 text-center bg-gradient-to-b from-blue-50 to-white">
-        <div class="max-w-4xl mx-auto">
-            <span class="inline-block bg-blue-100 text-blue-700 text-xs font-bold px-4 py-1 rounded-full mb-4">DESDE 1983 EM MOUQUIM, PORTUGAL</span>
-            <h2 class="text-5xl md:text-7xl font-extrabold text-blue-950 mb-6 leading-tight tracking-tighter">Potência Química,<br><span class="text-blue-600">Confiança Industrial.</span></h2>
-            <p class="text-xl text-gray-600 max-w-2xl mx-auto mb-12 leading-relaxed">Fornecemos hipoclorito de sódio e soluções de higiene de alta performance para o mercado nacional e internacional.</p>
-            <div class="flex flex-col sm:flex-row justify-center gap-4">
-                <a href="#orcamento" class="bg-blue-600 text-white px-10 py-4 rounded-full text-lg font-bold shadow-lg hover:bg-blue-700 transition transform hover:-translate-y-1">Solicitar Cotação</a>
-                <a href="#produtos" class="bg-white border-2 border-gray-200 text-gray-700 px-10 py-4 rounded-full text-lg font-bold hover:border-gray-300 transition">Ver Catálogo</a>
+    <header class="py-32 px-6 text-center bg-[url('https://images.unsplash.com/photo-1581093199516-acb51a84f59e?q=80&w=2000&auto=format&fit=crop')] bg-cover bg-center relative overflow-hidden">
+        <div class="absolute inset-0 bg-blue-950/80 backdrop-blur-sm"></div>
+        <div class="max-w-5xl mx-auto relative z-10 text-white">
+            <span class="inline-block bg-blue-500/30 text-blue-200 text-xs font-bold px-5 py-1.5 rounded-full mb-6 tracking-widest uppercase">Indústria Química Portuguesa • Desde 1983</span>
+            <h2 class="text-6xl md:text-8xl font-extrabold mb-8 leading-tight tracking-tighter">Potência Química.<br>Confiança <span class="text-blue-400">Industrial Global.</span></h2>
+            <p class="text-2xl text-blue-100 max-w-3xl mx-auto mb-16 leading-relaxed opacity-90">Fabricamos hipoclorito de sódio e soluções de higiene de alta performance para o mercado nacional e internacional.</p>
+            <div class="flex flex-col sm:flex-row justify-center gap-6">
+                <a href="#orcamento" class="bg-blue-600 text-white px-12 py-5 rounded-full text-xl font-bold shadow-2xl hover:bg-blue-500 transition transform hover:-translate-y-1 hover:scale-105">Solicitar Cotação B2B</a>
             </div>
         </div>
     </header>
 
-    <section id="produtos" class="py-20 px-6 bg-white">
+    <section id="produtos" class="py-24 px-6 bg-white">
         <div class="max-w-7xl mx-auto">
-            <h3 class="text-4xl font-extrabold text-blue-950 mb-12 tracking-tight text-center">Nosso Catálogo B2B</h3>
-            <div class="grid md:grid-cols-3 gap-8">
-                <div class="border border-gray-100 rounded-2xl p-6 bg-gray-50 hover:shadow-xl transition group">
-                    <div class="aspect-square bg-gray-200 rounded-xl mb-6 flex items-center justify-center text-gray-400 group-hover:bg-blue-100 transition">
-                        <svg class="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-1.912.956a11.963 11.963 0 01-5.18 2.42m3.674-8.982.973-.486a2 2 0 001.032-1.471l.442-2.732a.476.476 0 01.925 0l.442 2.732a2 2 0 001.032 1.471l.973.486a.476.476 0 010 .868l-.973.486a2 2 0 00-1.032 1.471l-.442 2.732a.476.476 0 01-.925 0l-.442-2.732a2 2 0 00-1.032-1.471l-.973-.486a.476.476 0 010-.868z"></path></svg>
+            <h3 class="text-5xl font-extrabold text-blue-950 mb-16 tracking-tight text-center">Soluções Industriais</h3>
+            <div class="grid md:grid-cols-3 gap-10">
+                <div class="border border-gray-100 rounded-3xl p-8 bg-gray-50 hover:shadow-2xl transition-all group hover:border-blue-100 transform hover:-translate-y-1">
+                    <div class="aspect-video bg-blue-100 rounded-2xl mb-8 flex items-center justify-center text-blue-500 group-hover:scale-105 transition-all">
+                        <svg class="w-20 h-20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="0.5" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-1.912.956a11.963 11.963 0 01-5.18 2.42m3.674-8.982.973-.486a2 2 0 001.032-1.471l.442-2.732a.476.476 0 01.925 0l.442 2.732a2 2 0 001.032 1.471l.973.486a.476.476 0 010 .868l-.973.486a2 2 0 00-1.032 1.471l-.442 2.732a.476.476 0 01-.925 0l-.442-2.732a2 2 0 00-1.032-1.471l-.973-.486a.476.476 0 010-.868z"></path></svg>
                     </div>
-                    <h4 class="text-xl font-bold text-blue-900 mb-2">Hipoclorito de Sódio</h4>
-                    <p class="text-gray-600 text-sm mb-4">Uso industrial e tratamento de águas. Disponível em várias concentrações.</p>
-                    <span class="text-xs font-mono text-gray-400">REF: CL-HIPO</span>
+                    <h4 class="text-2xl font-bold text-blue-950 mb-3">Hipoclorito de Sódio</h4>
+                    <p class="text-gray-600 mb-6 text-sm leading-relaxed">Uso industrial e tratamento de águas. Disponível em várias concentrações para processos críticos.</p>
+                    <span class="text-xs font-mono text-gray-400 bg-gray-100 px-3 py-1 rounded-md">REF: CL-HIPO-IND</span>
                 </div>
-                <div class="border border-gray-100 rounded-2xl p-6 bg-gray-50 hover:shadow-xl transition group">
-                    <div class="aspect-square bg-gray-200 rounded-xl mb-6 flex items-center justify-center text-gray-400 group-hover:bg-blue-100 transition">
-                        <svg class="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-1.912.956a11.963 11.963 0 01-5.18 2.42m3.674-8.982.973-.486a2 2 0 001.032-1.471l.442-2.732a.476.476 0 01.925 0l.442 2.732a2 2 0 001.032 1.471l.973.486a.476.476 0 010 .868l-.973.486a2 2 0 00-1.032 1.471l-.442 2.732a.476.476 0 01-.925 0l-.442-2.732a2 2 0 00-1.032-1.471l-.973-.486a.476.476 0 010-.868z"></path></svg>
-                    </div>
-                    <h4 class="text-xl font-bold text-blue-900 mb-2">Lixívia Super Blanch</h4>
-                    <p class="text-gray-600 text-sm mb-4">Brancura impecável e desinfeção profunda para têxteis e superfícies.</p>
-                    <span class="text-xs font-mono text-gray-400">REF: CL-BLANCH</span>
                 </div>
-                <div class="border border-gray-100 rounded-2xl p-6 bg-gray-50 hover:shadow-xl transition group">
-                    <div class="aspect-square bg-gray-200 rounded-xl mb-6 flex items-center justify-center text-gray-400 group-hover:bg-blue-100 transition">
-                        <svg class="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-1.912.956a11.963 11.963 0 01-5.18 2.42m3.674-8.982.973-.486a2 2 0 001.032-1.471l.442-2.732a.476.476 0 01.925 0l.442 2.732a2 2 0 001.032 1.471l.973.486a.476.476 0 010 .868l-.973.486a2 2 0 00-1.032 1.471l-.442 2.732a.476.476 0 01-.925 0l-.442-2.732a2 2 0 00-1.032-1.471l-.973-.486a.476.476 0 010-.868z"></path></svg>
-                    </div>
-                    <h4 class="text-xl font-bold text-blue-900 mb-2">Detergente Industrial</h4>
-                    <p class="text-gray-600 text-sm mb-4">Fórmula desengordurante potente para chão de fábrica e oficinas.</p>
-                    <span class="text-xs font-mono text-gray-400">REF: CL-DETIND</span>
-                </div>
-            </div>
         </div>
     </section>
 
-    <section id="orcamento" class="py-24 px-6 bg-gray-100">
-        <div class="max-w-2xl mx-auto bg-white p-10 rounded-3xl shadow-xl border border-gray-100 relative overflow-hidden">
-            <div class="absolute top-0 right-0 w-32 h-32 bg-blue-100 rounded-full -mr-16 -mt-16 opacity-50"></div>
+    <section id="orcamento" class="py-28 px-6 bg-gray-100 relative overflow-hidden">
+        <div class="absolute -top-40 -left-40 w-96 h-96 bg-blue-200 rounded-full opacity-30 backdrop-blur-3xl"></div>
+        <div class="absolute -bottom-40 -right-40 w-96 h-96 bg-blue-300 rounded-full opacity-20 backdrop-blur-3xl"></div>
+        
+        <div class="max-w-3xl mx-auto bg-white/95 p-12 rounded-3xl shadow-2xl border border-gray-100 relative overflow-hidden backdrop-blur-sm">
+            <h3 class="text-4xl font-extrabold text-blue-950 mb-3 tracking-tight text-center">Inicie sua Cotação</h3>
+            <p class="text-lg text-gray-600 mb-10 text-center max-w-lg mx-auto">Receba uma proposta personalizada para grandes volumes da nossa equipa comercial.</p>
             
-            <h3 class="text-3xl font-extrabold text-blue-950 mb-2 tracking-tight relative">Solicitar Cotação B2B</h3>
-            <p class="text-gray-600 mb-8 relative">Preencha os dados da sua empresa e receba uma proposta personalizada.</p>
-            
-            <form id="b2b-form" class="space-y-5 relative">
-                <div class="grid md:grid-cols-2 gap-5">
-                    <input type="text" id="empresa" placeholder="Nome da Empresa / NIF" class="w-full p-4 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-400 outline-none transition bg-gray-50" required>
-                    <input type="email" id="email" placeholder="E-mail Corporativo" class="w-full p-4 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-400 outline-none transition bg-gray-50" required>
+            <form id="b2b-form" class="space-y-6">
+                <div class="grid md:grid-cols-2 gap-6">
+                    <input type="text" id="empresa" placeholder="Nome da Empresa / NIF Corporativo" class="w-full p-5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-400 outline-none transition bg-gray-50 focus:bg-white text-lg" required>
+                    <input type="email" id="email" placeholder="E-mail Corporativo" class="w-full p-5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-400 outline-none transition bg-gray-50 focus:bg-white text-lg" required>
                 </div>
-                <select id="produto" class="w-full p-4 rounded-xl border border-gray-200 outline-none bg-gray-50 text-gray-700 focus:ring-2 focus:ring-blue-400">
-                    <option>Hipoclorito de Sódio</option>
-                    <option>Lixívia Super Blanch</option>
-                    <option>Detergente Industrial</option>
-                    <option>Outros / Consulta Geral</option>
+                <select id="produto" class="w-full p-5 rounded-xl border border-gray-200 outline-none bg-gray-50 text-gray-700 focus:ring-2 focus:ring-blue-400 text-lg">
+                    <option>Hipoclorito de Sódio (Volume Industrial)</option>
+                    <option>Lixívia Super Blanch (Paletes)</option>
+                    <option>Detergente Industrial (Contentores)</option>
                 </select>
-                <textarea id="mensagem" placeholder="Detalhes do pedido (quantidade, local de entrega...)" rows="4" class="w-full p-4 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-400 outline-none transition bg-gray-50"></textarea>
+                <textarea id="mensagem" placeholder="Detalhes do pedido (quantidade, local de entrega...)" rows="5" class="w-full p-5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-400 outline-none transition bg-gray-50 focus:bg-white text-lg"></textarea>
                 
-                <button type="submit" id="btn-enviar" class="w-full bg-blue-600 text-white font-bold py-4 rounded-xl hover:bg-blue-700 transition shadow-md flex items-center justify-center gap-2 text-lg">
-                    <span id="btn-text">Enviar Pedido de Orçamento</span>
+                <button type="submit" id="btn-enviar" class="w-full bg-blue-600 text-white font-extrabold py-5 rounded-xl hover:bg-blue-700 transition shadow-xl text-xl transform hover:-translate-y-1 flex items-center justify-center gap-3">
+                    <span id="btn-text">Enviar Pedido de Orçamento Industrial</span>
                 </button>
             </form>
             
-            <div id="msg-sucesso" class="hidden text-center py-10">
-                <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6 text-green-600">
-                    <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+            <div id="msg-sucesso" class="hidden text-center py-16">
+                <div class="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-8 text-green-600 shadow-inner">
+                    <svg class="w-14 h-14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
                 </div>
-                <h4 class="text-2xl font-bold text-gray-800 mb-2">Pedido Enviado!</h4>
-                <p class="text-gray-600">A nossa equipa comercial entrará em contacto com a <span id="sucesso-empresa" class="font-semibold text-blue-700"></span> muito em breve.</p>
-                <button onclick="window.location.reload()" class="mt-8 text-blue-600 underline text-sm">Enviar outro pedido</button>
+                <h4 class="text-3xl font-extrabold text-gray-900 mb-3 tracking-tight">Pedido Recebido!</h4>
+                <p class="text-xl text-gray-600 max-w-sm mx-auto">A nossa equipa comercial entrará em contacto com a <span id="sucesso-empresa" class="font-bold text-blue-700"></span> em breve.</p>
+                <button onclick="window.location.reload()" class="mt-10 text-blue-600 underline font-medium">Enviar outro pedido</button>
             </div>
         </div>
     </section>
 
-    <footer class="py-12 px-6 bg-blue-950 text-blue-200 text-center">
-        <p class="font-semibold text-lg mb-2">CLOROSOL Indústria Química, Lda.</p>
-        <p class="text-sm opacity-80">Rua Central de Mouquim, Vila Nova de Famalicão, Portugal.</p>
-        <p class="mt-6 text-xs opacity-60">&copy; 2026 Clorosol. Todos os direitos reservados. MVP Funcional.</p>
+    <footer class="py-16 px-6 bg-blue-950 text-blue-200 text-center text-sm">
+        <div class="max-w-7xl mx-auto grid md:grid-cols-3 gap-10 items-center">
+            <div class="text-left flex items-center gap-3">
+                <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center text-white font-extrabold text-xl shadow-inner">C</div>
+                <h1 class="text-2xl font-extrabold text-white tracking-tighter">CLOROSOL</h1>
+            </div>
+            <p class="text-xs opacity-70">Mouquim, Vila Nova de Famalicão, Portugal.</p>
+            <p class="text-right text-xs opacity-60">&copy; 2026 Clorosol. Todos os direitos reservados. MVP Extraordinário.</p>
+        </div>
     </footer>
 
-    <div id="chat-bubble" class="fixed bottom-6 right-6 w-16 h-16 bg-blue-600 rounded-full shadow-2xl flex items-center justify-center text-white cursor-pointer hover:scale-110 transition z-50 transform hover:rotate-12">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <div id="chat-bubble" class="fixed bottom-8 right-8 w-18 h-18 bg-blue-600 rounded-full shadow-2xl flex items-center justify-center text-white cursor-pointer hover:scale-110 transition z-50 transform hover:rotate-12 hover:bg-blue-500 scale-100 animate-pulse">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-9 w-9" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
         </svg>
     </div>
 
-    <div id="chat-window" class="chat-window fixed bottom-24 right-6 w-80 h-96 bg-white rounded-2xl shadow-2xl border border-gray-100 z-50 flex flex-col overflow-hidden">
-        <div class="bg-blue-600 p-4 text-white font-bold flex justify-between items-center">
-            <span>Assistente Clorosol (IA)</span>
-            <button id="close-chat" class="opacity-70 hover:opacity-100">&times;</button>
+    <div id="chat-window" class="chat-window fixed bottom-28 right-8 w-96 h-[500px] bg-white rounded-2xl shadow-2xl border border-gray-100 z-50 flex flex-col overflow-hidden backdrop-blur-lg">
+        <div class="bg-blue-600 p-5 text-white font-bold flex justify-between items-center shadow-md">
+            <span>Assistente Clorosol (IA Flash)</span>
+            <button id="close-chat" class="opacity-70 hover:opacity-100 text-2xl">&times;</button>
         </div>
-        <div class="flex-1 p-4 space-y-3 overflow-y-auto text-sm bg-gray-50">
-            <p class="bg-blue-100 text-blue-900 p-3 rounded-xl rounded-bl-none max-w-[80%]">Olá! Sou a IA da Clorosol. Posso responder sobre a nossa história, exportação e produtos. Como posso ajudar?</p>
+        
+        <div id="chat-messages" class="flex-1 p-5 space-y-4 overflow-y-auto bg-gray-50 text-sm">
+            <p class="msg-ai bg-blue-100 text-blue-900 p-4 max-w-[85%] shadow-sm">Olá! Sou a IA da Clorosol. Posso responder sobre a nossa história, exportação e produtos industriais. Como posso ajudar?</p>
+        </div>
+        
+        <div class="p-4 border-t border-gray-100 bg-white">
+            <div class="relative">
+                <input type="text" id="chat-input" placeholder="Digite sua pergunta..." class="w-full p-4 pr-12 rounded-xl border border-gray-200 text-sm focus:ring-2 focus:ring-blue-300 outline-none bg-gray-50">
+                <button id="btn-send-chat" class="absolute right-3 top-3 text-blue-600 hover:scale-110 transition">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
+                </button>
             </div>
-        <div class="p-3 border-t border-gray-100 bg-white">
-            <input type="text" placeholder="Digite sua pergunta..." class="w-full p-2.5 rounded-lg border border-gray-200 text-sm focus:ring-1 focus:ring-blue-400 outline-none">
         </div>
     </div>
 
     <script>
-        // --- LÓGICA DO FORMULÁRIO B2B (CONEXÃO SUPABASE) ---
+        // --- 1. LÓGICA DO FORMULÁRIO B2B (SUPABASE) ---
         const form = document.getElementById('b2b-form');
         const msgSucesso = document.getElementById('msg-sucesso');
         const btnText = document.getElementById('btn-text');
         const btnEnviar = document.getElementById('btn-enviar');
 
         form.addEventListener('submit', async (e) => {
-            e.preventDefault(); // Não recarrega a página
+            e.preventDefault();
             
             // Estado de "Carregando"
-            btnText.innerText = 'A processar pedido...';
+            btnText.innerText = 'A processar pedido industrial...';
             btnEnviar.disabled = true;
             btnEnviar.classList.add('opacity-70', 'cursor-not-allowed');
 
-            // Pega os valores dos campos
             const empresaNome = document.getElementById('empresa').value;
             const email = document.getElementById('email').value;
             const produto = document.getElementById('produto').value;
             const mensagem = document.getElementById('mensagem').value;
 
-            // Tenta inserir os dados na tabela 'orcamentos' do Supabase
-            const { error } = await supabase
+            // Inserir dados na tabela 'orcamentos' do Supabase
+            const { error } = await supabaseClient
                 .from('orcamentos')
                 .insert([{ 
                     empresa_nome: empresaNome, 
@@ -174,31 +183,99 @@
                 }]);
 
             if (error) {
-                // Se der erro (ex: chaves erradas ou tabela não existe)
                 alert('Ocorreu um erro ao enviar: ' + error.message);
                 btnText.innerText = 'Tentar novamente';
                 btnEnviar.disabled = false;
                 btnEnviar.classList.remove('opacity-70', 'cursor-not-allowed');
             } else {
-                // Se der certo
-                form.classList.add('hidden'); // Esconde o formulário
-                document.getElementById('sucesso-empresa').innerText = empresaNome; // Coloca o nome da empresa na mensagem
-                msgSucesso.classList.remove('hidden'); // Mostra mensagem de sucesso
+                // Sucesso
+                form.classList.add('hidden');
+                document.getElementById('sucesso-empresa').innerText = empresaNome;
+                msgSucesso.classList.remove('hidden');
             }
         });
 
-        // --- LÓGICA DE ABRIR/FECHAR O CHAT (UI) ---
+        // --- 2. LÓGICA DO CHAT (UI + GEMINI IA) ---
         const chatBubble = document.getElementById('chat-bubble');
         const chatWindow = document.getElementById('chat-window');
         const closeChat = document.getElementById('close-chat');
+        const chatInput = document.getElementById('chat-input');
+        const chatMessages = document.getElementById('chat-messages');
+        const btnSendChat = document.getElementById('btn-send-chat');
 
+        // Abrir/Fechar Chat
         chatBubble.addEventListener('click', () => {
             chatWindow.classList.toggle('open');
+            chatBubble.classList.remove('animate-pulse');
         });
+        closeChat.addEventListener('click', () => chatWindow.classList.remove('open'));
 
-        closeChat.addEventListener('click', () => {
-            chatWindow.classList.remove('open');
-        });
+        // Enviar mensagem (Lógica Principal)
+        async function sendMessage() {
+            const userMessage = chatInput.value.trim();
+            if (!userMessage) return;
+
+            // 1. Mostrar mensagem do usuário
+            appendMessage('user', userMessage);
+            chatInput.value = '';
+
+            // 2. Mostrar indicador de "digitando"
+            const typingId = showTypingIndicator();
+
+            try {
+                // 3. Chamar a API do Gemini
+                // Nota: As Instruções do Sistema (System Instructions) devem ser configuradas no GAS, não no código front-end por segurança.
+                const result = await model.generateContent(userMessage);
+                const response = await result.response;
+                const aiText = response.text();
+
+                // 4. Remover indicador e mostrar resposta da IA
+                removeTypingIndicator(typingId);
+                appendMessage('ai', aiText);
+
+            } catch (error) {
+                console.error("Erro no Gemini:", error);
+                removeTypingIndicator(typingId);
+                appendMessage('ai', "Desculpe, estou com dificuldades técnicas. Por favor, tente novamente ou use o formulário de orçamento.");
+            }
+        }
+
+        // Eventos de envio
+        btnSendChat.addEventListener('click', sendMessage);
+        chatInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
+
+        // Funções Auxiliares de UI do Chat
+        function appendMessage(sender, text) {
+            const msgP = document.createElement('p');
+            msgP.innerText = text;
+            msgP.classList.add('p-4', 'max-w-[85%]', 'shadow-sm', sender === 'user' ? 'msg-user' : 'msg-ai');
+            
+            if (sender === 'user') {
+                msgP.classList.add('bg-blue-600', 'text-white', 'ml-auto');
+            } else {
+                msgP.classList.add('bg-blue-100', 'text-blue-900');
+            }
+            
+            chatMessages.appendChild(msgP);
+            // Scroll automático para baixo
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function showTypingIndicator() {
+            const typingDiv = document.createElement('div');
+            typingDiv.classList.add('msg-ai', 'bg-blue-100', 'p-3', 'w-16', 'flex', 'items-center', 'justify-center', 'shadow-sm');
+            typingDiv.innerHTML = '<div class="typing-dots"><div></div><div></div><div></div></div>';
+            const id = 'typing-' + Date.now();
+            typingDiv.id = id;
+            chatMessages.appendChild(typingDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            return id;
+        }
+
+        function removeTypingIndicator(id) {
+            const el = document.getElementById(id);
+            if (el) el.remove();
+        }
     </script>
 </body>
 </html>
